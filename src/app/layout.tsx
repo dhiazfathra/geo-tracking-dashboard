@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import 'leaflet/dist/leaflet.css'
 
 // Third-party Imports
@@ -25,7 +26,8 @@ const RootLayout = ({ children }: ChildrenType) => {
   return (
     <html id='__next' lang='en' dir={direction}>
       <body className='flex is-full min-bs-full flex-auto flex-col'>
-        <WebSocketProvider>{children}</WebSocketProvider>
+        {/* <WebSocketProvider></WebSocketProvider> */}
+        {children}
       </body>
     </html>
   )

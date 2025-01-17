@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -15,7 +16,7 @@ import {
   Alert
 } from '@mui/material'
 
-import { useWebSocket } from '@/context/WebSocketContext'
+// import { useWebSocket } from '@/context/WebSocketContext'
 
 interface Device {
   id: string
@@ -36,86 +37,87 @@ const RealtimeMonitor: React.FC = () => {
   const [timelines, setTimelines] = useState<Timeline[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const socket = useWebSocket()
 
-  useEffect(() => {
-    console.log('Socket in page:', socket) // Harus menampilkan WebSocket instance
+  // const socket = useWebSocket()
 
-    if (!socket) return
+  // useEffect(() => {
+  //   console.log('Socket in page:', socket) // Harus menampilkan WebSocket instance
 
-    // WebSocket Connected
-    socket.onopen = () => {
-      console.log('WebSocket connected, from page')
+  //   if (!socket) return
 
-      // Minta data awal (realtimeMonitor)
-      socket.send(JSON.stringify({ event: 'realtimeMonitor', payload: {} }))
-    }
+  //   // WebSocket Connected
+  //   socket.onopen = () => {
+  //     console.log('WebSocket connected, from page')
 
-    // Handle WebSocket Messages
-    socket.onmessage = event => {
-      console.log('WebSocket message received:', event.data)
+  //     // Minta data awal (realtimeMonitor)
+  //     socket.send(JSON.stringify({ event: 'realtimeMonitor', payload: {} }))
+  //   }
 
-      const data = JSON.parse(event.data)
+  //   // Handle WebSocket Messages
+  //   socket.onmessage = event => {
+  //     console.log('WebSocket message received:', event.data)
 
-      console.log('Received WebSocket event:', data)
+  //     const data = JSON.parse(event.data)
 
-      switch (data.event) {
-        case 'realtimeMonitor':
-          if (data.payload.length === 0) {
-            setError('Tidak ada timeline aktif.')
-            setTimelines([])
-          } else {
-            setError(null)
-            setTimelines(data.payload)
-          }
+  //     console.log('Received WebSocket event:', data)
 
-          setLoading(false)
-          break
+  //     switch (data.event) {
+  //       case 'realtimeMonitor':
+  //         if (data.payload.length === 0) {
+  //           setError('Tidak ada timeline aktif.')
+  //           setTimelines([])
+  //         } else {
+  //           setError(null)
+  //           setTimelines(data.payload)
+  //         }
 
-        case 'locationUpdate':
-          // Perbarui lokasi jika ada update
-          setTimelines(prevTimelines => {
-            const updatedTimelines = [...prevTimelines]
+  //         setLoading(false)
+  //         break
 
-            const timelineIndex = updatedTimelines.findIndex(timeline => timeline.deviceId === data.payload.deviceId)
+  //       case 'locationUpdate':
+  //         // Perbarui lokasi jika ada update
+  //         setTimelines(prevTimelines => {
+  //           const updatedTimelines = [...prevTimelines]
 
-            if (timelineIndex !== -1) {
-              updatedTimelines[timelineIndex] = {
-                ...updatedTimelines[timelineIndex],
-                locations: [
-                  ...(updatedTimelines[timelineIndex].locations || []),
-                  {
-                    latitude: data.payload.latitude,
-                    longitude: data.payload.longitude,
-                    reverseData: data.payload.reverseData
-                  }
-                ]
-              }
-            }
+  //           const timelineIndex = updatedTimelines.findIndex(timeline => timeline.deviceId === data.payload.deviceId)
 
-            return updatedTimelines
-          })
-          break
+  //           if (timelineIndex !== -1) {
+  //             updatedTimelines[timelineIndex] = {
+  //               ...updatedTimelines[timelineIndex],
+  //               locations: [
+  //                 ...(updatedTimelines[timelineIndex].locations || []),
+  //                 {
+  //                   latitude: data.payload.latitude,
+  //                   longitude: data.payload.longitude,
+  //                   reverseData: data.payload.reverseData
+  //                 }
+  //               ]
+  //             }
+  //           }
 
-        default:
-          console.warn('Unhandled WebSocket event:', data.event)
-          break
-      }
-    }
+  //           return updatedTimelines
+  //         })
+  //         break
 
-    // Handle WebSocket Error
-    socket.onerror = error => {
-      console.error('WebSocket error:', error)
-      setError('Gagal terhubung ke server.')
-      setLoading(false)
-    }
+  //       default:
+  //         console.warn('Unhandled WebSocket event:', data.event)
+  //         break
+  //     }
+  //   }
 
-    // Cleanup
-    return () => {
-      socket.onmessage = null
-      socket.onerror = null
-    }
-  }, [socket])
+  //   // Handle WebSocket Error
+  //   socket.onerror = error => {
+  //     console.error('WebSocket error:', error)
+  //     setError('Gagal terhubung ke server.')
+  //     setLoading(false)
+  //   }
+
+  //   // Cleanup
+  //   return () => {
+  //     socket.onmessage = null
+  //     socket.onerror = null
+  //   }
+  // }, [socket])
 
   if (loading) {
     return (
