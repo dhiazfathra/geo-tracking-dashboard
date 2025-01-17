@@ -3,16 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import axios from 'axios'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  Alert
-} from '@mui/material'
+import { Table, TableBody, TableCell, TableHead, TableRow, CircularProgress, Alert } from '@mui/material'
 
 interface Device {
   id: string
@@ -92,32 +83,32 @@ const TimelineTable: React.FC = () => {
 
   return (
     <div style={{ padding: '16px' }}>
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Device Name</TableCell>
-              <TableCell>Start Time</TableCell>
-              <TableCell>End Time</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {timelines.map(timeline => (
-              <TableRow
-                key={timeline.id}
-                hover
-                onClick={() => router.push(`/history/${timeline.id}`)}
-                style={{ cursor: 'pointer' }}
-              >
-                <TableCell>{timeline.Device.name || 'Unknown'}</TableCell>
-                <TableCell>{formatDate(timeline.startTime)}</TableCell>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>ID</TableCell>
+            <TableCell>Device Name</TableCell>
+            <TableCell>Start Time</TableCell>
+            <TableCell>End Time</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {timelines.map(timeline => (
+            <TableRow
+              key={timeline.id}
+              hover
+              onClick={() => router.push(`/history/${timeline.id}`)}
+              style={{ cursor: 'pointer' }}
+            >
+              <TableCell>{timeline.id || 'Unknown'}</TableCell>
+              <TableCell>{timeline.Device.name || 'Unknown'}</TableCell>
+              <TableCell>{formatDate(timeline.startTime)}</TableCell>
 
-                <TableCell>{timeline.endTime ? formatDate(timeline.endTime) : 'Ongoing'}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+              <TableCell>{timeline.endTime ? formatDate(timeline.endTime) : 'Ongoing'}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   )
 }

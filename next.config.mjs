@@ -16,6 +16,10 @@ const nextConfig = {
       {
         source: '/apis/:path*',
         destination: `${process.env.API_URL}/:path*`
+      },
+      {
+        source: '/ws',
+        destination: 'http://103.153.60.118:3002'
       }
     ]
   }
