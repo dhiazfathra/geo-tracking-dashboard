@@ -19,7 +19,7 @@ const nextConfig = {
       },
       {
         source: '/ws',
-        destination: 'http://103.153.60.118:3002'
+        destination: 'ws://103.153.60.118:3002'
       }
     ]
   }

@@ -10,9 +10,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const ws = new WebSocket('ws://103.153.60.118:3002')
+      // const ws = new WebSocket('ws://103.153.60.118:3002')
 
-      // const ws = new WebSocket('ws://localhost:3000/ws')
+      const ws = new WebSocket('ws://localhost:3000/ws')
 
       ws.onopen = () => {
         console.log('WebSocket connected, from context')
