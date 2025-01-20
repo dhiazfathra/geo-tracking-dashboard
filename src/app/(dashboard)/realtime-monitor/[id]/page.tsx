@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react'
 
 import dynamic from 'next/dynamic'
-
 import { useParams } from 'next/navigation'
 
 import {
@@ -30,13 +29,8 @@ interface Location {
   createdAt: string
 }
 
-interface Device {
-  name: string
-}
-
 interface TimelineDetail {
   locations: Location[]
-  device: Device
 }
 
 const DynamicMap = dynamic(() => import('../../../components/DynamicMap'), { ssr: false })
@@ -61,34 +55,55 @@ const TimelineDetailPage: React.FC = () => {
       hour12: false
     }
 
-    const date = new Date(dateString)
-
-    return new Intl.DateTimeFormat('en-US', options).format(date)
+    return new Intl.DateTimeFormat('en-US', options).format(new Date(dateString))
   }
 
   useEffect(() => {
-    if (!socket || !timelineId) return
+    if (!socket || !timelineId) {
+      console.log('Socket atau timelineId tidak tersedia.')
+      setError('ID Tidak valid.')
 
-    socket.send(JSON.stringify({ event: 'timelineDetailRealtime', timelineId }))
+      return
+    }
+
+    // Kirim request detailActivity ke server
+    // socket.send(JSON.stringify({ event: 'detailActivity', timelineId }))
+
+    socket.send(JSON.stringify({ event: 'detailActivity', data: { timelineId } }))
 
     socket.onmessage = event => {
-      const data = JSON.parse(event.data)
+      try {
+        const response = JSON.parse(event.data)
 
-      if (data.event === 'timelineDetailRealtime') {
-        if (data.payload.error) {
-          setError(data.payload.error)
-        } else {
-          setTimeline(data.payload)
+        console.log(response.event, 'eventnya')
+
+        if (response.event === 'detailActivity') {
+          if (response.datas && response.datas.length > 0) {
+            setTimeline({ locations: response.datas })
+            setError(null)
+          } else {
+            setError('Tidak ada detail timeline ditemukan.')
+            setTimeline(null)
+          }
+
+          setLoading(false)
         }
-
+      } catch (err) {
+        console.error('Kesalahan parsing pesan:', err)
+        setError('Terjadi kesalahan memproses data dari server.')
         setLoading(false)
       }
     }
 
+    socket.onerror = error => {
+      console.error('Kesalahan WebSocket:', error)
+      setError('Gagal terhubung ke server.')
+      setLoading(false)
+    }
+
     return () => {
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({ event: 'unsubscribe', type: 'timelineDetailRealtime', timelineId }))
-      }
+      console.log('Membersihkan listener WebSocket...')
+      socket.onmessage = null
     }
   }, [socket, timelineId])
 
@@ -108,9 +123,17 @@ const TimelineDetailPage: React.FC = () => {
     )
   }
 
+  if (!timeline || timeline.locations.length === 0) {
+    return (
+      <Box sx={{ textAlign: 'center', marginTop: '20px' }}>
+        <Alert severity='info'>Tidak ada detail timeline ditemukan.</Alert>
+      </Box>
+    )
+  }
+
   return (
     <Box sx={{ padding: '20px' }}>
-      <h2>{timeline?.device.name}</h2>
+      <h2>Detail Timeline</h2>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -123,12 +146,12 @@ const TimelineDetailPage: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {timeline?.locations.map(location => (
+            {timeline.locations.map(location => (
               <TableRow key={location.id}>
                 <TableCell>{location.latitude}</TableCell>
                 <TableCell>{location.longitude}</TableCell>
                 <TableCell>{location.eventType}</TableCell>
-                <TableCell>{JSON.parse(location.reverseData).village || 'Unknown Address'}</TableCell>
+                <TableCell>{JSON.parse(location.reverseData)?.village || 'Unknown Address'}</TableCell>
                 <TableCell>{formatDate(location.createdAt)}</TableCell>
               </TableRow>
             ))}
@@ -136,7 +159,7 @@ const TimelineDetailPage: React.FC = () => {
         </Table>
       </TableContainer>
       <Box sx={{ height: '500px', width: '100%', marginTop: '20px' }}>
-        <DynamicMap locations={timeline?.locations || []} />
+        <DynamicMap locations={timeline.locations} />
       </Box>
     </Box>
   )

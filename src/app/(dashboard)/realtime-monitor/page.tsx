@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
+import { useRouter } from 'next/navigation'
 
 import {
   Box,
@@ -16,7 +17,7 @@ import {
   Alert
 } from '@mui/material'
 
-// import { useWebSocket } from '@/context/WebSocketContext'
+import { useWebSocket } from '@/context/WebSocketContext'
 
 interface Device {
   id: string
@@ -38,87 +39,71 @@ const RealtimeMonitor: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // const socket = useWebSocket()
+  const socket = useWebSocket()
 
-  // useEffect(() => {
-  //   console.log('Socket in page:', socket) // Harus menampilkan WebSocket instance
+  const router = useRouter()
 
-  //   if (!socket) return
+  useEffect(() => {
+    if (!socket) {
+      console.log('Socket belum siap.')
 
-  //   // WebSocket Connected
-  //   socket.onopen = () => {
-  //     console.log('WebSocket connected, from page')
+      return
+    }
 
-  //     // Minta data awal (realtimeMonitor)
-  //     socket.send(JSON.stringify({ event: 'realtimeMonitor', payload: {} }))
-  //   }
+    console.log('Socket siap, membuka koneksi WebSocket...')
 
-  //   // Handle WebSocket Messages
-  //   socket.onmessage = event => {
-  //     console.log('WebSocket message received:', event.data)
+    const fetchData = () => {
+      console.log('Mengirim request activeTimeline...')
+      socket.send(JSON.stringify({ event: 'activeTimeline' }))
+    }
 
-  //     const data = JSON.parse(event.data)
+    // WebSocket Connected
+    socket.onopen = () => {
+      console.log('WebSocket connected')
+      fetchData()
+    }
 
-  //     console.log('Received WebSocket event:', data)
+    // Handle WebSocket Messages
+    socket.onmessage = event => {
+      // console.log('Pesan WebSocket diterima:', event.data)
 
-  //     switch (data.event) {
-  //       case 'realtimeMonitor':
-  //         if (data.payload.length === 0) {
-  //           setError('Tidak ada timeline aktif.')
-  //           setTimelines([])
-  //         } else {
-  //           setError(null)
-  //           setTimelines(data.payload)
-  //         }
+      try {
+        const data = JSON.parse(event.data)
 
-  //         setLoading(false)
-  //         break
+        if (data.event === 'activeTimeline') {
+          if (!data.data || data.data.length === 0) {
+            setError('Tidak ada device aktif.')
+            setTimelines([])
+          } else {
+            setError(null)
+            setTimelines(data.data)
+          }
 
-  //       case 'locationUpdate':
-  //         // Perbarui lokasi jika ada update
-  //         setTimelines(prevTimelines => {
-  //           const updatedTimelines = [...prevTimelines]
+          setLoading(false)
+        }
+      } catch (err) {
+        console.error('Gagal memproses pesan WebSocket:', err)
+        setError('Data tidak valid dari server.')
+        setLoading(false)
+      }
+    }
 
-  //           const timelineIndex = updatedTimelines.findIndex(timeline => timeline.deviceId === data.payload.deviceId)
+    // Handle WebSocket Error
+    socket.onerror = error => {
+      console.error('Kesalahan WebSocket:', error)
+      setError('Gagal terhubung ke server.')
+      setLoading(false)
+    }
 
-  //           if (timelineIndex !== -1) {
-  //             updatedTimelines[timelineIndex] = {
-  //               ...updatedTimelines[timelineIndex],
-  //               locations: [
-  //                 ...(updatedTimelines[timelineIndex].locations || []),
-  //                 {
-  //                   latitude: data.payload.latitude,
-  //                   longitude: data.payload.longitude,
-  //                   reverseData: data.payload.reverseData
-  //                 }
-  //               ]
-  //             }
-  //           }
+    // Cleanup
+    return () => {
+      console.log('Membersihkan listener WebSocket...')
+      socket.onmessage = null
+      socket.onerror = null
+    }
+  }, [socket])
 
-  //           return updatedTimelines
-  //         })
-  //         break
-
-  //       default:
-  //         console.warn('Unhandled WebSocket event:', data.event)
-  //         break
-  //     }
-  //   }
-
-  //   // Handle WebSocket Error
-  //   socket.onerror = error => {
-  //     console.error('WebSocket error:', error)
-  //     setError('Gagal terhubung ke server.')
-  //     setLoading(false)
-  //   }
-
-  //   // Cleanup
-  //   return () => {
-  //     socket.onmessage = null
-  //     socket.onerror = null
-  //   }
-  // }, [socket])
-
+  // Fallback saat loading
   if (loading) {
     return (
       <Box sx={{ textAlign: 'center', marginTop: '20px' }}>
@@ -127,6 +112,7 @@ const RealtimeMonitor: React.FC = () => {
     )
   }
 
+  // Menampilkan error
   if (error) {
     return (
       <Box sx={{ textAlign: 'center', marginTop: '20px' }}>
@@ -135,14 +121,7 @@ const RealtimeMonitor: React.FC = () => {
     )
   }
 
-  if (timelines.length === 0) {
-    return (
-      <Box sx={{ textAlign: 'center', marginTop: '20px' }}>
-        <Alert severity='info'>Tidak ada timeline aktif.</Alert>
-      </Box>
-    )
-  }
-
+  // Menampilkan tabel jika ada data
   return (
     <Box sx={{ padding: '20px' }}>
       <TableContainer component={Paper}>
@@ -156,7 +135,12 @@ const RealtimeMonitor: React.FC = () => {
           </TableHead>
           <TableBody>
             {timelines.map(timeline => (
-              <TableRow key={timeline.id}>
+              <TableRow
+                key={timeline.id}
+                hover
+                onClick={() => router.push(`/realtime-monitor/${timeline.id}`)}
+                style={{ cursor: 'pointer' }}
+              >
                 <TableCell>{timeline.Device.name}</TableCell>
                 <TableCell>{new Date(timeline.startTime).toLocaleString()}</TableCell>
                 <TableCell>{timeline.endTime ? new Date(timeline.endTime).toLocaleString() : 'Ongoing'}</TableCell>

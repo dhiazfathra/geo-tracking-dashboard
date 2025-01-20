@@ -10,18 +10,18 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const ws = new WebSocket('ws://103.153.60.118:3002')
+      const ws = new WebSocket('ws://chatdevel.cocorolife.id')
 
-      // const ws = new WebSocket('ws://localhost:3000/ws')
+      // const ws = new WebSocket('ws://localhost:3002')
 
       ws.onopen = () => {
-        console.log('WebSocket connected, from context')
-        ws.send(JSON.stringify({ event: 'realtimeMonitor' }))
+        // console.log('WebSocket connected, from context')
+        ws.send(JSON.stringify({ event: 'activeTimeline' }))
         setSocket(ws)
       }
 
       ws.onclose = () => {
-        console.log('WebSocket disconnected, retrying...')
+        // console.log('WebSocket disconnected, retrying...')
         reconnectTimeout.current = window.setTimeout(connectWebSocket, 5000)
       }
 
