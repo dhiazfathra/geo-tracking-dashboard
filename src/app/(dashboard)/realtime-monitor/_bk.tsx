@@ -44,15 +44,6 @@ const RealtimeMonitor: React.FC = () => {
   const router = useRouter()
 
   useEffect(() => {
-    const hasReloaded = localStorage.getItem('hasReloaded')
-
-    if (hasReloaded === 'false') {
-      localStorage.setItem('hasReloaded', 'true')
-      window.location.reload()
-
-      return
-    }
-
     if (!socket) {
       console.log('Socket belum siap.')
 
@@ -147,10 +138,7 @@ const RealtimeMonitor: React.FC = () => {
               <TableRow
                 key={timeline.id}
                 hover
-                onClick={() => {
-                  localStorage.setItem('hasReloadedDetail', 'false')
-                  router.push(`/realtime-monitor/${timeline.id}`)
-                }}
+                onClick={() => router.push(`/realtime-monitor/${timeline.id}`)}
                 style={{ cursor: 'pointer' }}
               >
                 <TableCell>{timeline.Device.name}</TableCell>

@@ -74,7 +74,13 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         <MenuItem href='/history' icon={<i className='tabler-history' />}>
           History
         </MenuItem>
-        <MenuItem href='/realtime-monitor' icon={<i className='tabler-user-screen' />}>
+        <MenuItem
+          href='/realtime-monitor'
+          icon={<i className='tabler-user-screen' />}
+          onClick={() => {
+            localStorage.setItem('hasReloaded', 'false')
+          }}
+        >
           Real Time Monitoring
         </MenuItem>
       </Menu>

@@ -59,6 +59,15 @@ const TimelineDetailPage: React.FC = () => {
   }
 
   useEffect(() => {
+    const hasReloadedDetail = localStorage.getItem('hasReloadedDetail')
+
+    if (hasReloadedDetail === 'false') {
+      localStorage.setItem('hasReloadedDetail', 'true')
+      window.location.reload()
+
+      return
+    }
+
     if (!socket || !timelineId) {
       console.log('Socket atau timelineId tidak tersedia.')
       setError('ID Tidak valid.')
