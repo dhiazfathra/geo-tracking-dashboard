@@ -10,7 +10,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const ws = new WebSocket('ws://chatdevel.cocorolife.id')
+      const ws = new WebSocket('wss://chatdevel.cocorolife.id')
 
       // const ws = new WebSocket('ws://localhost:3002')
 
