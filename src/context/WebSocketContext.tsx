@@ -2,26 +2,45 @@
 
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 
-const WebSocketContext = createContext<WebSocket | null>(null)
+// WebSocket Context
+const WebSocketContext = createContext<{
+  socket: WebSocket | null
+  data: any // Store received data
+}>({
+  socket: null,
+  data: null
+})
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null)
+  const [data, setData] = useState<any>(null) // State for received WebSocket data
   const reconnectTimeout = useRef<number | null>(null)
 
   useEffect(() => {
     const connectWebSocket = () => {
       const ws = new WebSocket('wss://chatdevel.cocorolife.id')
 
-      // const ws = new WebSocket('ws://localhost:3002')
-
       ws.onopen = () => {
-        // console.log('WebSocket connected, from context')
+        console.log('WebSocket connected')
         ws.send(JSON.stringify({ event: 'activeTimeline' }))
         setSocket(ws)
       }
 
+      ws.onmessage = event => {
+        try {
+          const receivedData = JSON.parse(event.data)
+
+          console.log('Data received from WebSocket:', receivedData)
+
+          // Update state with received data
+          setData(receivedData)
+        } catch (error) {
+          console.error('Error parsing WebSocket message:', error)
+        }
+      }
+
       ws.onclose = () => {
-        // console.log('WebSocket disconnected, retrying...')
+        console.log('WebSocket disconnected, retrying...')
         reconnectTimeout.current = window.setTimeout(connectWebSocket, 5000)
       }
 
@@ -44,7 +63,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [])
 
-  return <WebSocketContext.Provider value={socket}>{children}</WebSocketContext.Provider>
+  return <WebSocketContext.Provider value={{ socket, data }}>{children}</WebSocketContext.Provider>
 }
 
 export const useWebSocket = () => useContext(WebSocketContext)

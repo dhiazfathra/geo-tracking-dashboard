@@ -39,9 +39,9 @@ const TimelineDetailPage: React.FC = () => {
   const [timeline, setTimeline] = useState<TimelineDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const params = useParams()
-  const socket = useWebSocket()
 
+  const params = useParams()
+  const { socket } = useWebSocket() // Ambil `socket` dari context
   const timelineId = params?.id
 
   const formatDate = (dateString: string) => {
@@ -75,16 +75,25 @@ const TimelineDetailPage: React.FC = () => {
       return
     }
 
-    // Kirim request detailActivity ke server
-    // socket.send(JSON.stringify({ event: 'detailActivity', timelineId }))
+    const fetchData = () => {
+      if (socket.readyState === WebSocket.OPEN) {
+        console.log('Mengirim request detailActivity...')
+        socket.send(JSON.stringify({ event: 'detailActivity', data: { timelineId } }))
+      } else {
+        console.error('Socket belum siap.')
+        setError('Gagal mengirim request ke server.')
+      }
+    }
 
-    socket.send(JSON.stringify({ event: 'detailActivity', data: { timelineId } }))
+    // Kirim request detailActivity
+    fetchData()
 
-    socket.onmessage = event => {
+    // Listener WebSocket untuk menerima pesan
+    const onMessage = (event: MessageEvent) => {
       try {
         const response = JSON.parse(event.data)
 
-        console.log(response.event, 'eventnya')
+        console.log('Event diterima:', response.event)
 
         if (response.event === 'detailActivity') {
           if (response.datas && response.datas.length > 0) {
@@ -104,15 +113,20 @@ const TimelineDetailPage: React.FC = () => {
       }
     }
 
-    socket.onerror = error => {
+    // Listener Error
+    const onError = (error: Event) => {
       console.error('Kesalahan WebSocket:', error)
       setError('Gagal terhubung ke server.')
       setLoading(false)
     }
 
+    socket.addEventListener('message', onMessage)
+    socket.addEventListener('error', onError)
+
     return () => {
       console.log('Membersihkan listener WebSocket...')
-      socket.onmessage = null
+      socket.removeEventListener('message', onMessage)
+      socket.removeEventListener('error', onError)
     }
   }, [socket, timelineId])
 
@@ -160,7 +174,17 @@ const TimelineDetailPage: React.FC = () => {
                 <TableCell>{location.latitude}</TableCell>
                 <TableCell>{location.longitude}</TableCell>
                 <TableCell>{location.eventType}</TableCell>
-                <TableCell>{JSON.parse(location.reverseData)?.village || 'Unknown Address'}</TableCell>
+                <TableCell>
+                  {(() => {
+                    try {
+                      const reverseData = JSON.parse(location.reverseData)
+
+                      return reverseData?.village || 'Unknown Address'
+                    } catch {
+                      return 'Unknown Address'
+                    }
+                  })()}
+                </TableCell>
                 <TableCell>{formatDate(location.createdAt)}</TableCell>
               </TableRow>
             ))}

@@ -39,8 +39,7 @@ const RealtimeMonitor: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const socket = useWebSocket()
-
+  const { socket } = useWebSocket() // Ambil socket dari WebSocket context
   const router = useRouter()
 
   useEffect(() => {
@@ -63,7 +62,12 @@ const RealtimeMonitor: React.FC = () => {
 
     const fetchData = () => {
       console.log('Mengirim request activeTimeline...')
-      socket.send(JSON.stringify({ event: 'activeTimeline' }))
+
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ event: 'activeTimeline' })) // Kirim event ke server
+      } else {
+        console.error('Socket belum terbuka.')
+      }
     }
 
     // WebSocket Connected
@@ -74,8 +78,6 @@ const RealtimeMonitor: React.FC = () => {
 
     // Handle WebSocket Messages
     socket.onmessage = event => {
-      // console.log('Pesan WebSocket diterima:', event.data)
-
       try {
         const data = JSON.parse(event.data)
 
