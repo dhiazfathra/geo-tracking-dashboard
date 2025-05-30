@@ -83,6 +83,9 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         >
           Real Time Monitoring
         </MenuItem>
+        <MenuItem href='/multi-pointer' icon={<i className='tabler-map-pin' />}>
+          Multi-Pointer Tracking
+        </MenuItem>
       </Menu>
       {/* <Menu
         popoutMenuOffset={{ mainAxis: 23 }}
