@@ -6,19 +6,19 @@ import dynamic from 'next/dynamic'
 import { useParams } from 'next/navigation'
 
 import {
+  Alert,
   Box,
+  CircularProgress,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Paper,
-  CircularProgress,
-  Alert
+  TableRow
 } from '@mui/material'
 
-import { useWebSocket } from '@/context/WebSocketContext'
+import { useWebSocket } from '@/context/WebSocketContextRealtimeMonitor'
 
 interface Location {
   id: number

@@ -11,8 +11,8 @@ import type { ChildrenType } from '@core/types'
 import '@/app/globals.css'
 
 // Generated Icon CSS Imports
+import { WebSocketProvider } from '@/context/WebSocketContextRealtimeMonitor'
 import '@assets/iconify-icons/generated-icons.css'
-import { WebSocketProvider } from '@/context/WebSocketContext'
 
 export const metadata = {
   title: 'Dashboard Tracker Geolocation',
