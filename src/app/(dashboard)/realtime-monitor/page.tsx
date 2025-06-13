@@ -5,19 +5,19 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import {
+  Alert,
   Box,
+  CircularProgress,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Paper,
-  CircularProgress,
-  Alert
+  TableRow
 } from '@mui/material'
 
-import { useWebSocket } from '@/context/WebSocketContext'
+import { useWebSocket } from '@/context/WebSocketContextRealtimeMonitor'
 
 interface Device {
   id: string
