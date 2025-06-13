@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import dynamic from 'next/dynamic';
 
@@ -21,9 +21,8 @@ const MultiPointerMap = dynamic(() => import('@/components/multi-pointer/MultiPo
 
 const MultiPointerPage = () => {
   const [pointers, setPointers] = useState<Pointer[]>([])
-  const [connected, setConnected] = useState(false)
+  const [_connected, setConnected] = useState(false)
   const [lastUpdate, setLastUpdate] = useState<string>('')
-  const [updateCount, setUpdateCount] = useState<number>(0)
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
 
   // Use refs to avoid unnecessary re-renders
@@ -62,6 +61,7 @@ const MultiPointerPage = () => {
     const handlePointerAdded = (pointer: Pointer) => {
       // Update both state and ref
       const newPointers = [...pointersRef.current, pointer]
+
       setPointers(newPointers)
       pointersRef.current = newPointers
       setLastUpdate(new Date().toLocaleTimeString())
@@ -71,6 +71,7 @@ const MultiPointerPage = () => {
     const handlePointerRemoved = (data: { id: string }) => {
       // Update both state and ref
       const newPointers = pointersRef.current.filter(p => p.id !== data.id)
+
       setPointers(newPointers)
       pointersRef.current = newPointers
       setLastUpdate(new Date().toLocaleTimeString())
@@ -102,7 +103,7 @@ const MultiPointerPage = () => {
     }
 
     // Handle disconnection
-    const handleDisconnected = () => {
+    const _handleDisconnected = () => {
       setConnected(false)
       setConnectionStatus('disconnected')
     }

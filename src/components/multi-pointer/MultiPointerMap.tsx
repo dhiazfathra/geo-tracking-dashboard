@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import { Box, Button, Typography } from '@mui/material'
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import { Pointer } from '@/services/socket'
+import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from 'react-leaflet'
+
+import type { Pointer } from '@/services/socket'
 import socketService from '@/services/socket'
+import 'leaflet/dist/leaflet.css'
 
 // Fix for default marker icons in Leaflet with Next.js
 const markerIcon = new L.Icon({
@@ -21,13 +23,14 @@ const markerIcon = new L.Icon({
 
 // Component to handle map clicks
 function MapEvents() {
-  const map = useMapEvents({
+  const _map = useMapEvents({
     click: (e) => {
       const { lat, lng } = e.latlng
+
       socketService.addPointer(lat, lng)
     }
   })
-  
+
   return null
 }
 
@@ -38,7 +41,7 @@ interface MultiPointerMapProps {
 
 const MultiPointerMap = ({ pointers, onRemovePointer }: MultiPointerMapProps) => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([0, 0])
-  
+
   useEffect(() => {
     // Set initial map center based on first pointer or default to Jakarta
     if (pointers.length > 0) {
@@ -48,24 +51,27 @@ const MultiPointerMap = ({ pointers, onRemovePointer }: MultiPointerMapProps) =>
       setMapCenter([-6.2088, 106.8456])
     }
   }, [pointers])
-  
+
   // Handle random movement of a pointer (for demo purposes)
   const handleMovePointer = (pointer: Pointer) => {
     const newLat = pointer.latitude + (Math.random() - 0.5) * 0.01
     const newLng = pointer.longitude + (Math.random() - 0.5) * 0.01
+
     socketService.movePointer(pointer.id, newLat, newLng)
   }
-  
+
   // Format timestamp for display
   const formatTimestamp = (timestamp: string) => {
     try {
       const date = new Date(timestamp)
+
+
       return date.toLocaleString()
     } catch (e) {
       return timestamp
     }
   }
-  
+
   return (
     <Box sx={{ height: '100%', width: '100%', position: 'relative' }}>
       {mapCenter[0] !== 0 && (
@@ -78,7 +84,7 @@ const MultiPointerMap = ({ pointers, onRemovePointer }: MultiPointerMapProps) =>
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          
+
           {pointers.map((pointer) => (
             <Marker
               key={pointer.id}
@@ -127,7 +133,7 @@ const MultiPointerMap = ({ pointers, onRemovePointer }: MultiPointerMapProps) =>
               </Popup>
             </Marker>
           ))}
-          
+
           <MapEvents />
         </MapContainer>
       )}
