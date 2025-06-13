@@ -34,10 +34,10 @@ const WebSocketContext = createContext<{
   pointers: [],
   connected: false,
   connect: () => { throw new Error('Not implemented') },
-  getPointers: () => {},
-  addPointer: () => {},
-  removePointer: () => {},
-  movePointer: () => {}
+  getPointers: () => { },
+  addPointer: () => { },
+  removePointer: () => { },
+  movePointer: () => { }
 })
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -48,8 +48,10 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Get WebSocket URL from environment variables or use default
   const baseUrl = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'http://localhost:3001'
+
   // Convert http/https URLs to ws/wss
   const serverUrl = baseUrl.replace(/^http/, 'ws')
+
   console.log(`WebSocketContext initialized with URL: ${serverUrl}`)
 
   const connectWebSocket = () => {
@@ -60,6 +62,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       console.log('WebSocket connected')
       setSocket(ws)
       setConnected(true)
+
       // Request initial pointers data
       ws.send(JSON.stringify({ event: 'getPointers' }))
     }
@@ -67,6 +70,7 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     ws.onmessage = event => {
       try {
         const message: WebSocketEvent = JSON.parse(event.data)
+
         console.log('Data received from WebSocket:', message)
 
         // Handle different event types
@@ -115,20 +119,23 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Only connect when explicitly requested
   const connect = () => {
     const ws = connectWebSocket()
+
+
     return ws
   }
-  
+
   // Clean up function for when component unmounts
   useEffect(() => {
     return () => {
       if (reconnectTimeout.current) {
         clearTimeout(reconnectTimeout.current)
       }
-      
+
       if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) {
         socket.close()
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // WebSocket API methods
@@ -153,16 +160,16 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }
 
   return (
-    <WebSocketContext.Provider 
-      value={{ 
-        socket, 
-        pointers, 
+    <WebSocketContext.Provider
+      value={{
+        socket,
+        pointers,
         connected,
         connect,
-        getPointers, 
-        addPointer, 
-        removePointer, 
-        movePointer 
+        getPointers,
+        addPointer,
+        removePointer,
+        movePointer
       }}
     >
       {children}
